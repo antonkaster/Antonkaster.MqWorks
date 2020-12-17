@@ -62,9 +62,14 @@ namespace Antonkaster.MqWorks
         }
 
 
+        private bool disposed = false;
         public void Dispose()
         {
-            DisposeManagedResources();
+            if (!disposed)
+            {
+                DisposeManagedResources();
+                disposed = true;
+            }
         }
 
         protected virtual void DisposeManagedResources()

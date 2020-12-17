@@ -25,7 +25,7 @@ namespace Antonkaster.MqWorks.MqServer.BasicRpcServer
         }
 
 
-        public MqBasicRpcServer StartListening(string channelName, Func<byte[],byte[]> onRecieveFunction, IBasicProperties properties = null)
+        public MqBasicRpcServer StartListening(string channelName, Func<byte[],byte[]> onRecieveFunction)
         {
             if (string.IsNullOrWhiteSpace(channelName))
                 throw new ArgumentNullException("Channe name can't be null!");
@@ -55,12 +55,12 @@ namespace Antonkaster.MqWorks.MqServer.BasicRpcServer
             return this;
         }
 
-        public MqBasicRpcServer StartListening<TRequest,TResult>(string channelName, Func<TRequest, TResult> onRecieveFunction, IBasicProperties properties = null)
+        public MqBasicRpcServer StartListening<TRequest,TResult>(string channelName, Func<TRequest, TResult> onRecieveFunction)
         {
             if (onRecieveFunction == null)
                 throw new ArgumentNullException("OnRecieve function can't be null!");
 
-            return StartListening(channelName, m => onRecieveFunction.Invoke(m.ToObject<TRequest>()).ToBytes(), properties);
+            return StartListening(channelName, m => onRecieveFunction.Invoke(m.ToObject<TRequest>()).ToBytes());
         }
 
         private void Consumer_Received(object sender, BasicDeliverEventArgs e)

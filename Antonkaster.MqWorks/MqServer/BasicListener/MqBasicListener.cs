@@ -27,7 +27,11 @@ namespace Antonkaster.MqWorks.MqServer.BasicListener
         {
         }
 
-        public MqBasicListener StartListening(string channelName, Action<byte[]> onRecieveAction, IBasicProperties properties = null)
+        public MqBasicListener StartListening(
+            string channelName,
+            Action<byte[]> onRecieveAction, 
+            IBasicProperties properties = null, 
+            bool autoDelete = false)
         {
             if (string.IsNullOrWhiteSpace(channelName))
                 throw new ArgumentNullException("Channe name can't be null!");
@@ -35,7 +39,7 @@ namespace Antonkaster.MqWorks.MqServer.BasicListener
                 throw new ArgumentNullException("OnRecieve action can't be null!");
 
             IModel channel = Connection.CreateModel();
-            channel.QueueDeclare(channelName, true, false, false, null);
+            channel.QueueDeclare(channelName, true, false, autoDelete, null);
 
             EventingBasicConsumer consumer = new EventingBasicConsumer(channel);
             consumer.Received += Consumer_Received;
@@ -56,12 +60,12 @@ namespace Antonkaster.MqWorks.MqServer.BasicListener
             return this;
         }
 
-        public MqBasicListener StartListening<T>(string channelName, Action<T> onRecieveAction, IBasicProperties properties = null)
+        public MqBasicListener StartListening<T>(string channelName, Action<T> onRecieveAction, IBasicProperties properties = null, bool autoDelete = false)
         {
             if (onRecieveAction == null)
                 throw new ArgumentNullException("OnRecieve action can't be null!");
 
-            return StartListening(channelName, m => onRecieveAction.Invoke(m.ToObject<T>()), properties);
+            return StartListening(channelName, m => onRecieveAction.Invoke(m.ToObject<T>()), properties, autoDelete);
         }
 
         private void Consumer_Received(object sender, BasicDeliverEventArgs e)

@@ -15,9 +15,9 @@ namespace MqConsole
             var connectionFactory = MqWorksFactory.CreateConnectionFactory(new MqConnectionConfig());
 
             new MqBasicListener(connectionFactory)
-                .StartListening("test/testclass", new Action<TestClass>(m => Console.WriteLine($"TestClass: {m}")))
-                .StartListening("test/string", new Action<string>(m => Console.WriteLine($"string: {m}")))
-                .StartListening("test/int", new Action<int>(m => Console.WriteLine($"int: {m}")));
+                .StartListening("test/testclass", new Action<TestClass>(m => Console.WriteLine($"TestClass: {m}")), autoDelete: true)
+                .StartListening("test/string", new Action<string>(m => Console.WriteLine($"string: {m}")), autoDelete: true)
+                .StartListening("test/int", new Action<int>(m => Console.WriteLine($"int: {m}")), autoDelete: true);
 
             new MqBasicRpcServer(connectionFactory)
                 .StartListening<int, int>("test/getInt", m => m + 1)

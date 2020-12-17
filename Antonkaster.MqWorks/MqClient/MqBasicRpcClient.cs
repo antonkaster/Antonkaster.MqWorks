@@ -12,6 +12,12 @@ namespace Antonkaster.MqWorks.MqClient
 {
     public class MqBasicRpcClient : MqBase
     {
+        /// <summary>
+        /// Request timeout (msec)
+        /// 0 = infinity
+        /// </summary>
+        public int Timeout { get; set; } = 0;
+
         public MqBasicRpcClient(IMqConnectionConfig connectionConfig) : base(connectionConfig)
         {
         }
@@ -44,18 +50,36 @@ namespace Antonkaster.MqWorks.MqClient
 
                 _consumer.Received += (model, ea) =>
                 {
-                    var body = ea.Body.ToArray();
                     if (ea.BasicProperties.CorrelationId == correlationId)
-                    {
-                        respQueue.Add(body);
-                    }
+                        respQueue.Add(ea.Body.ToArray());
                 };
+                
 
                 channel.BasicPublish("", channelName, props, requestBytes);
                 channel.BasicConsume(_consumer, replyQueueName, true);
 
-                byte[] data = respQueue.Take();
+                byte[] data = new byte[0];
 
+                if (Timeout == 0)
+                {
+                    data = respQueue.Take();
+                }
+                else
+                {
+                    DateTime started = DateTime.Now;
+                    DateTime expired = started.AddMilliseconds(Timeout);
+
+                    while(!respQueue.TryTake(out data))
+                    {
+                        if (DateTime.Now > expired)
+                        {
+                            channel.Abort();
+                            channel.Close();
+                            throw new MqRpcResponseTimeout();
+                        }
+                    }
+
+                }
                 return data.ToObject<TResponse>();
             }
         }

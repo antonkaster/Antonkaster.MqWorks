@@ -4,13 +4,13 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <Authors>Anton Kazakov</Authors>
     <Copyright>Anton Kazakov</Copyright>
-    <Description>antonkaster@gmail.com</Description>
+    <Description>RabbitMQ basic servers and clients</Description>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.6.15</AssemblyVersion>
-    <FileVersion>1.0.6.15</FileVersion>
+    <AssemblyVersion>1.0.10.25</AssemblyVersion>
+    <FileVersion>1.0.10.25</FileVersion>
     <Company>Anton Kazakov</Company>
     <RepositoryUrl>https://github.com/antonkaster/Antonkaster.MqWorks</RepositoryUrl>
-    <Version>1.0.1</Version>
+    <Version>1.0.3</Version>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
