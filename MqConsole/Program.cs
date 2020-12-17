@@ -15,14 +15,10 @@ namespace MqConsole
 
             var basicListener = new MqBasicListener(connectionFactory);
 
-            basicListener.StartListening(
-                "test/test",
-                new Action<string>(m => Console.WriteLine($"1: {m}")),
-                null);
-            basicListener.StartListening(
-                "test/test2",
-                new Action<string>(m => Console.WriteLine($"2: {m}")),
-                null);
+            basicListener
+                .StartListening("test/testclass", new Action<TestClass>(m => Console.WriteLine($"TestClass: {m}")))
+                .StartListening("test/string", new Action<string>(m => Console.WriteLine($"string: {m}")))
+                .StartListening("test/int", new Action<int>(m => Console.WriteLine($"int: {m}")));
 
 
             Console.ReadLine();
@@ -36,7 +32,7 @@ namespace MqConsole
 
         public override string ToString()
         {
-            return $"a = {A}; b = '{B}'";
+            return $"TestClasss: a = {A}; b = '{B}'";
         }
     }
 }

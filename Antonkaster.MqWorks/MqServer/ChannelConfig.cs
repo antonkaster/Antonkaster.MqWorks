@@ -4,7 +4,7 @@ using System;
 
 namespace Antonkaster.MqWorks.MqServer
 {
-    internal class ChannelItem
+    internal class ChannelConfig
     {
         public string ConsumerTag { get; set; }
         public IModel Channel { get; set; }

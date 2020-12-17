@@ -22,18 +22,20 @@ namespace Antonkaster.MqWorks.MqClient
         {
         }
 
-        public void SendToChannel(byte[] bytesToSend, string channelName, IBasicProperties properties = null)
+        public MqBasicClient SendToChannel(byte[] bytesToSend, string channelName, IBasicProperties properties = null)
         {
             using IModel channel = Connection.CreateModel();
 
             channel.QueueDeclare(channelName, true, false, false, null);
             channel.BasicPublish("", channelName, properties, bytesToSend);
+
+            return this;
         }
 
-        public void SendToChannel(string stringToSend, string channelName, IBasicProperties properties = null)
+        public MqBasicClient SendToChannel(string stringToSend, string channelName, IBasicProperties properties = null)
             => SendToChannel(Encoding.UTF8.GetBytes(stringToSend), channelName, properties);
 
-        public void SendToChannel<TSend>(TSend objToSend, string channelName, IBasicProperties properties = null)
+        public MqBasicClient SendToChannel<TSend>(TSend objToSend, string channelName, IBasicProperties properties = null)
             => SendToChannel(objToSend.ToBytes(), channelName, properties);
 
     }

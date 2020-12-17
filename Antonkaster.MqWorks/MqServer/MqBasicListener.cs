@@ -1,4 +1,6 @@
-﻿using RabbitMQ.Client;
+﻿using Antonkaster.MqWorks.Exceptions;
+using Antonkaster.MqWorks.Extensions;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
 using System.Collections.Generic;
@@ -11,7 +13,7 @@ namespace Antonkaster.MqWorks.MqServer
     {
         public bool AutoAckMessages { get; set; } = false;
 
-        private readonly Dictionary<string, ChannelItem> channels = new Dictionary<string, ChannelItem>();
+        private readonly Dictionary<string, ChannelConfig> channels = new Dictionary<string, ChannelConfig>();
 
         public MqBasicListener(MqConnectionConfig connectionConfig) : base(connectionConfig)
         {
@@ -25,7 +27,7 @@ namespace Antonkaster.MqWorks.MqServer
         {
         }
 
-        public void StartListening(string channelName, Action<byte[]> onRecieveAction, IBasicProperties properties = null)
+        public MqBasicListener StartListening(string channelName, Action<byte[]> onRecieveAction, IBasicProperties properties = null)
         {
             if (string.IsNullOrWhiteSpace(channelName))
                 throw new ArgumentNullException("Channe name can't be null!");
@@ -42,7 +44,7 @@ namespace Antonkaster.MqWorks.MqServer
 
             channels.Add(
                 consumerTag, 
-                new ChannelItem() 
+                new ChannelConfig() 
                 { 
                     ConsumerTag = consumerTag, 
                     Channel = channel, 
@@ -50,18 +52,31 @@ namespace Antonkaster.MqWorks.MqServer
                     OnRecieveAction = onRecieveAction
                 });
 
+            return this;
         }
 
-        public void StartListening(string channelName, Action<string> onRecieveAction, IBasicProperties properties = null)
+        public MqBasicListener StartListening(string channelName, Action<string> onRecieveAction, IBasicProperties properties = null)
         {
             if (onRecieveAction == null)
                 throw new ArgumentNullException("OnRecieve action can't be null!");
-            StartListening(channelName, m => onRecieveAction.Invoke(Encoding.UTF8.GetString(m)), properties);
+
+            return StartListening(channelName, m => onRecieveAction.Invoke(Encoding.UTF8.GetString(m)), properties);
+        }
+
+        public MqBasicListener StartListening<T>(string channelName, Action<T> onRecieveAction, IBasicProperties properties = null)
+        {
+            if (onRecieveAction == null)
+                throw new ArgumentNullException("OnRecieve action can't be null!");
+
+            return StartListening(channelName, m => onRecieveAction.Invoke(m.ToObject<T>()), properties);
         }
 
         private void Consumer_Received(object sender, BasicDeliverEventArgs e)
         {
-            ChannelItem channelItem = channels[e.ConsumerTag];
+            ChannelConfig channelItem = channels[e.ConsumerTag];
+
+            if (channelItem == null)
+                throw new MqRecieveException($"Channel not found (consumerTag: {e.ConsumerTag})!");
 
             try
             {
@@ -82,7 +97,7 @@ namespace Antonkaster.MqWorks.MqServer
 
         public void StopListening()
         {
-            foreach(ChannelItem channel in channels.Values)
+            foreach(ChannelConfig channel in channels.Values)
                 channel.Channel.Close();
         }
 
@@ -90,7 +105,7 @@ namespace Antonkaster.MqWorks.MqServer
         {
             StopListening();
 
-            foreach (ChannelItem channel in channels.Values)
+            foreach (ChannelConfig channel in channels.Values)
                 channel.Channel.Dispose();
 
             base.DisposeManagedResources();
