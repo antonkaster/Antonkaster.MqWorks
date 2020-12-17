@@ -12,7 +12,7 @@ namespace Antonkaster.MqWorks.MqClient
 {
     public class MqBasicRpcClient : MqBase
     {
-        public MqBasicRpcClient(MqConnectionConfig connectionConfig) : base(connectionConfig)
+        public MqBasicRpcClient(IMqConnectionConfig connectionConfig) : base(connectionConfig)
         {
         }
 
@@ -60,10 +60,7 @@ namespace Antonkaster.MqWorks.MqClient
             }
         }
 
-        public TResponse CallRemoteProcedure<TResponse>(string requestString, string channelName)
-            => CallRemoteProcedure<TResponse>(Encoding.UTF8.GetBytes(requestString), channelName);
-
-        public TResponse CallRemoteProcedure<TResponse, TRequest>(TRequest requestData, string channelName)
+        public TResponse CallRemoteProcedure<TRequest, TResponse>(TRequest requestData, string channelName)
             => CallRemoteProcedure<TResponse>(requestData.ToBytes(), channelName);
     }
 }

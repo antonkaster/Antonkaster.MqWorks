@@ -34,7 +34,7 @@ namespace Antonkaster.MqWorks
 
         private readonly ConnectionFactory _connectionFactory = null;
 
-        public MqBase(MqConnectionConfig connectionConfig)
+        public MqBase(IMqConnectionConfig connectionConfig)
         {
             if (connectionConfig == null)
                 throw new ArgumentNullException("Connection config can't be null!");

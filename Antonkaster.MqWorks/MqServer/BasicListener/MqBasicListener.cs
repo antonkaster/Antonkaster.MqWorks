@@ -7,15 +7,15 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Antonkaster.MqWorks.MqServer
+namespace Antonkaster.MqWorks.MqServer.BasicListener
 {
     public class MqBasicListener : MqBase
     {
         public bool AutoAckMessages { get; set; } = false;
 
-        private readonly Dictionary<string, ChannelConfig> channels = new Dictionary<string, ChannelConfig>();
+        private readonly Dictionary<string, ChannelListeningConfig> channels = new Dictionary<string, ChannelListeningConfig>();
 
-        public MqBasicListener(MqConnectionConfig connectionConfig) : base(connectionConfig)
+        public MqBasicListener(IMqConnectionConfig connectionConfig) : base(connectionConfig)
         {
         }
 
@@ -44,23 +44,16 @@ namespace Antonkaster.MqWorks.MqServer
 
             channels.Add(
                 consumerTag, 
-                new ChannelConfig() 
+                new ChannelListeningConfig() 
                 { 
                     ConsumerTag = consumerTag, 
                     Channel = channel, 
                     Consumer = consumer,
-                    OnRecieveAction = onRecieveAction
+                    OnRecieveAction = onRecieveAction,
+                    ChannelName = channelName
                 });
 
             return this;
-        }
-
-        public MqBasicListener StartListening(string channelName, Action<string> onRecieveAction, IBasicProperties properties = null)
-        {
-            if (onRecieveAction == null)
-                throw new ArgumentNullException("OnRecieve action can't be null!");
-
-            return StartListening(channelName, m => onRecieveAction.Invoke(Encoding.UTF8.GetString(m)), properties);
         }
 
         public MqBasicListener StartListening<T>(string channelName, Action<T> onRecieveAction, IBasicProperties properties = null)
@@ -73,14 +66,14 @@ namespace Antonkaster.MqWorks.MqServer
 
         private void Consumer_Received(object sender, BasicDeliverEventArgs e)
         {
-            ChannelConfig channelItem = channels[e.ConsumerTag];
+            ChannelListeningConfig channelItem = channels[e.ConsumerTag];
 
             if (channelItem == null)
                 throw new MqRecieveException($"Channel not found (consumerTag: {e.ConsumerTag})!");
 
             try
             {
-                channelItem.OnRecieveAction?.Invoke(e.Body.ToArray());
+                channelItem.OnRecieveAction.Invoke(e.Body.ToArray());
 
                 if (!AutoAckMessages)
                     channelItem.Channel.BasicAck(e.DeliveryTag, false);
@@ -97,7 +90,7 @@ namespace Antonkaster.MqWorks.MqServer
 
         public void StopListening()
         {
-            foreach(ChannelConfig channel in channels.Values)
+            foreach(ChannelListeningConfig channel in channels.Values)
                 channel.Channel.Close();
         }
 
@@ -105,7 +98,7 @@ namespace Antonkaster.MqWorks.MqServer
         {
             StopListening();
 
-            foreach (ChannelConfig channel in channels.Values)
+            foreach (ChannelListeningConfig channel in channels.Values)
                 channel.Channel.Dispose();
 
             base.DisposeManagedResources();

@@ -10,7 +10,7 @@ namespace Antonkaster.MqWorks.MqClient
 {
     public class MqBasicClient : MqBase
     {
-        public MqBasicClient(MqConnectionConfig connectionConfig) : base(connectionConfig)
+        public MqBasicClient(IMqConnectionConfig connectionConfig) : base(connectionConfig)
         {
         }
 
@@ -31,9 +31,6 @@ namespace Antonkaster.MqWorks.MqClient
 
             return this;
         }
-
-        public MqBasicClient SendToChannel(string stringToSend, string channelName, IBasicProperties properties = null)
-            => SendToChannel(Encoding.UTF8.GetBytes(stringToSend), channelName, properties);
 
         public MqBasicClient SendToChannel<TSend>(TSend objToSend, string channelName, IBasicProperties properties = null)
             => SendToChannel(objToSend.ToBytes(), channelName, properties);

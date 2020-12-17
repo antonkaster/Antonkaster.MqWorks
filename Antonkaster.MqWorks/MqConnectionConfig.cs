@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Antonkaster.MqWorks
 {
-    public class MqConnectionConfig
+    public class MqConnectionConfig : IMqConnectionConfig
     {
         public string Host { get; set; } = "localhost";
         public string VHost { get; set; } = "/";

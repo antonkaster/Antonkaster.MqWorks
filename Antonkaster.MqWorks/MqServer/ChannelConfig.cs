@@ -7,8 +7,8 @@ namespace Antonkaster.MqWorks.MqServer
     internal class ChannelConfig
     {
         public string ConsumerTag { get; set; }
+        public string ChannelName { get; set; }
         public IModel Channel { get; set; }
         public EventingBasicConsumer Consumer { get; set; }
-        public Action<byte[]> OnRecieveAction { get; set; }
     }
 }
